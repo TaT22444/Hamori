@@ -1,6 +1,6 @@
-import 'dotenv/config';
+require('dotenv/config');
 
-export default {
+module.exports = {
   name: "Hamori",
   slug: "hamori",
   version: "1.0.0",

@@ -1,14 +1,14 @@
 import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, useColorScheme, ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
-import { useColorScheme } from '@/hooks/useColorScheme';
 
 const HEADER_HEIGHT = 250;
 
@@ -33,16 +33,19 @@ export default function ParallaxScrollView({
   });
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
+    const translateY = scrollY.value > 0 ? scrollY.value * 0.5 : 0;
+    const scale = scrollY.value < 0 ? 1 - scrollY.value / HEADER_HEIGHT : 1;
+
     return {
       transform: [
         {
-          translateY: scrollY.value > 0 ? scrollY.value * 0.5 : 0,
+          translateY: withTiming(translateY),
         },
         {
-          scale: scrollY.value < 0 ? 1 - scrollY.value / HEADER_HEIGHT : 1,
+          scale: withTiming(scale),
         },
       ],
-    };
+    } as unknown as ViewStyle;
   });
 
   return (

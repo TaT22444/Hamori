@@ -1,14 +1,13 @@
 import React, { useState, createContext } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, SplashScreen } from 'expo-router';
+import { Stack, SplashScreen, Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useColorScheme } from 'react-native';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 
 // ボイスインプットの状態を管理するためのコンテキスト
 export const AppContext = createContext<{
@@ -53,6 +52,29 @@ export const AppContext = createContext<{
 
 // フォントの読み込みが終わるまでSplashScreenを表示
 SplashScreen.preventAutoHideAsync();
+
+// 認証状態に基づいてナビゲーションを制御するコンポーネント
+function AuthenticatedLayout() {
+  const { user, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === 'auth';
+    
+    if (!user && !inAuthGroup) {
+      // 未認証ユーザーを認証画面にリダイレクト
+      router.replace('/auth/login');
+    } else if (user && inAuthGroup) {
+      // 認証済みユーザーをメイン画面にリダイレクト
+      router.replace('/');
+    }
+  }, [user, segments, loading]);
+
+  return <Slot />;
+}
 
 // 実際のレイアウトコンポーネント
 function RootLayoutNav() {
@@ -109,12 +131,7 @@ function RootLayoutNav() {
     }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <View style={styles.container}>
-          <Stack initialRouteName="auth">
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-            <Stack.Screen name="auth" options={{ headerShown: false }} />
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-          </Stack>
+          <AuthenticatedLayout />
           <StatusBar style="auto" />
         </View>
       </ThemeProvider>

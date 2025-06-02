@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Platform, View, StyleSheet } from 'react-native';
+import { useColorScheme as _useColorScheme } from 'react-native';
 import BottomNav from '@/components/BottomNav';
 import VoiceInput from '@/components/VoiceInput';
 import HamoriModeSelector from '@/components/HamoriModeSelector';
@@ -30,6 +30,12 @@ const APP_MODE = {
   MODE_SELECTOR: 'selector',  // モード選択画面
   GROUP_READY: 'group_ready', // グループ準備画面
   VOICE_INPUT: 'voice_input'  // 音声入力画面
+};
+
+// カラースキームを安全に取得する関数
+const useColorScheme = () => {
+  const colorScheme = _useColorScheme();
+  return colorScheme ?? 'light';
 };
 
 export default function TabLayout() {
@@ -344,11 +350,20 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarStyle: { display: 'none' }, // 標準のタブバーを非表示
+          tabBarStyle: { display: 'none' },
         }}>
-        <Tabs.Screen name="index" />
-        <Tabs.Screen name="main" />
-        <Tabs.Screen name="profile" />
+        <Tabs.Screen
+          name="index"
+          options={{
+            href: '/',
+          }}
+        />
+        <Tabs.Screen
+          name="explore"
+          options={{
+            href: '/explore',
+          }}
+        />
       </Tabs>
       
       {/* カスタムナビゲーションバー - モーダル表示時には非表示 */}
